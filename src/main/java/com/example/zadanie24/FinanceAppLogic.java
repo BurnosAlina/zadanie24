@@ -1,5 +1,7 @@
 package com.example.zadanie24;
 
+import java.sql.Date;
+import java.util.List;
 import java.util.Scanner;
 
 public class FinanceAppLogic {
@@ -20,19 +22,33 @@ public class FinanceAppLogic {
             option = printAndGetOption();
             switch (option) {
                 case ADD -> {
-                    Transaction transaction = create();
-                    transactionDao.addTransaction(transaction);
+                    try {
+                        Transaction transaction = create();
+                        transactionDao.addTransaction(transaction);
+                    } catch (NotMatchingDescriptionException | IncorrectDateFormatException e) {
+                        System.out.println(e.getMessage());
+                    }
                 }
                 case UPDATE -> {
-                    Transaction updatedTransaction = update();
-                    transactionDao.updateTransaction(updatedTransaction);
+                    try {
+                        Transaction updatedTransaction = update();
+                        transactionDao.updateTransaction(updatedTransaction);
+                    } catch (NotMatchingDescriptionException | IncorrectDateFormatException e) {
+                        System.out.println(e.getMessage());
+                    }
                 }
                 case DELETE -> {
                     int id = getTransactionIdToDelete();
                     transactionDao.deleteTransaction(id);
                 }
-                case PRINT_ALL_INCOMES -> transactionDao.printTransactionOfType(Type.INCOME);
-                case PRINT_ALL_EXPENSES -> transactionDao.printTransactionOfType(Type.EXPENSE);
+                case PRINT_ALL_INCOMES -> {
+                    List<Transaction> incomes = transactionDao.getTransactionsOfType(Type.INCOME);
+                    printTransactionOfType(incomes);
+                }
+                case PRINT_ALL_EXPENSES -> {
+                    List<Transaction> expenses = transactionDao.getTransactionsOfType(Type.EXPENSE);
+                    printTransactionOfType(expenses);
+                }
                 case EXIT -> {
                     transactionDao.close();
                     System.out.println("Koniec programu, do zobaczenia!");
@@ -40,6 +56,12 @@ public class FinanceAppLogic {
                 default -> System.out.println("Niepoprawna opcja! Wybierz ponownie.");
             }
         } while (option != EXIT);
+    }
+
+    private void printTransactionOfType(List<Transaction> transactions) {
+        for (Transaction transaction : transactions) {
+            System.out.println(transaction);
+        }
     }
 
     private int printAndGetOption() {
@@ -74,24 +96,20 @@ public class FinanceAppLogic {
     private Transaction create() {
         System.out.println("Typ transakcji (wydatek/przychód)");
         String typePl = scanner.nextLine();
-        Type type = findTypeByDescriptionPl(typePl);
+        Type type = Type.findTypeByDescriptionPl(typePl);
         System.out.println("Opis");
         String description = scanner.nextLine();
         System.out.println("Kwota");
         double amount = scanner.nextDouble();
         scanner.nextLine();
         System.out.println("Data (yyyy-MM-dd)");
-        String date = scanner.nextLine();
-        return new Transaction(type, description, amount, date);
-    }
-
-    private Type findTypeByDescriptionPl(String descriptionPl) {
-        Type[] values = Type.values();
-        for (Type value : values) {
-            if (value.getPlDescription().equals(descriptionPl)) {
-                return value;
-            }
+        Date date;
+        try {
+            String dateString = scanner.nextLine();
+            date = Date.valueOf(dateString);
+        } catch (IllegalArgumentException e) {
+            throw new IncorrectDateFormatException("Nieprawidłowa data, prawidłowy format: yyyy-MM-dd");
         }
-        return null;
+        return new Transaction(type, description, amount, date);
     }
 }

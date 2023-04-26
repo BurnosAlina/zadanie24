@@ -1,19 +1,21 @@
 package com.example.zadanie24;
 
+import java.sql.Date;
+
 public class Transaction {
 
     private Integer id;
     private Type type;
     private String description;
     private double amount;
-    private String date;
+    private Date date;
 
-    public Transaction(Integer id, Type type, String description, double amount, String data) {
+    public Transaction(Integer id, Type type, String description, double amount, Date data) {
         this(type, description, amount, data);
         this.id = id;
     }
 
-    public Transaction(Type type, String description, double amount, String date) {
+    public Transaction(Type type, String description, double amount, Date date) {
         this.type = type;
         this.description = description;
         this.amount = amount;
@@ -57,11 +59,11 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 }

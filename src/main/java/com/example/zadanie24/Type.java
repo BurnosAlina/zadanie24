@@ -7,6 +7,16 @@ public enum Type {
 
     private String plDescription;
 
+    public static Type findTypeByDescriptionPl(String descriptionPl) {
+        Type[] values = Type.values();
+        for (Type value : values) {
+            if (value.plDescription.equals(descriptionPl)) {
+                return value;
+            }
+        }
+        throw new NotMatchingDescriptionException("Nieprawidłowy typ!");
+    }
+
     Type(String plDescription) {
         this.plDescription = plDescription;
     }
